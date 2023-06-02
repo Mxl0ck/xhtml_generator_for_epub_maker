@@ -1,0 +1,2 @@
+inputfile:".\\input\\input.txt"
+target:"第.章"
