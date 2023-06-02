@@ -1,0 +1,2 @@
+# xhtml_generator_for_epub_maker
+一个用于自动完成epub制作过程中创建多个xhtml文件并添加标签的步骤的工具
