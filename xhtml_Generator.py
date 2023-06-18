@@ -3,36 +3,48 @@
 #Theoretically, you can use this to read .docx, but I haven't tested what will happens when encounter an image
 import re 
 import linecache
+import docx
+import os
 
 with open('cfg.txt','r',encoding='utf-8') as file:
-    l=file.readlines() #按行读取TXT文件，都是字符串类型
+    l=file.readlines()
     d={}
     for i in l:
-        s=i.replace('\n','') #去除换行符
-        s0=s.split(sep=':') #以:分割字符串，左边是键，右边是值。同样都是字符串类型
+        s=i.replace('\n','')
+        s0=s.split(sep=':')
         if '"' in s0[1]:
-            s0[1]=s0[1].replace('"','') #字符串存在双引号，说明原本的值就是字符串类型。去掉多余的双引号
+            s0[1]=s0[1].replace('"','')
         else:
-            s0[1]=int(s0[1]) #说明原本值是整型，强制类型转换
-        d[s0[0]]=s0[1] #键值对添加到字典中
+            s0[1]=int(s0[1])
+        d[s0[0]]=s0[1]
     
 #变量赋值
 inputfile = d['inputfile']
 target = d['target']
+filename,extension = os.path.splitext(inputfile)
+number = []
+lineNumber = 1
+size = 0
+s_path = ".\\output\\"  #xhtml文件的存放路径 The path where the .xhtml file are stored    
+i_path = ".\\input\\"
 
+if extension == '.docx':
+    docfile=docx.Document(inputfile)
+    temp_out=open(i_path+'temp.txt','w',encoding='utf-8')
+    for para in docfile.paragraphs:
+        temp_out.write(para.text+'\n')
+        temp_out.close
+    inputfile='.\\input\\temp.txt'
+elif extension == '.txt':
+    inputfile=inputfile
 fp=open(inputfile,'r',encoding='utf-8')#输入源文件Input files
 head=open("head.txt","r")
 headtext=head.read()
 
-number =[]
-lineNumber = 1
-size=0
-s_path = ".\\output\\"  #xhtml文件的存放路径 The path where the .xhtml file are stored    
-
 for eachLine in fp:        
     m = re.search(target, eachLine) #搜索关键字,用于拆分章节 Search for keywords which Used to split chapters
     if m is not None:
-         number.append(lineNumber) #将关键字的行号记录在number中 Record the line number of the keyword in number
+        number.append(lineNumber) #将关键字的行号记录在number中 Record the line number of the keyword in number
     lineNumber = lineNumber + 1
 
 if len(number):
@@ -59,7 +71,7 @@ if len(number):
                 fp_end.write('\n'+'<p>'+ words +'</p>')
             fp_end.write('\n'+'</body>'+'\n'+'</html>')
             fp_end.close()
-    
+        
 else:
     size = int(lineNumber)
     for i in range(0,size-1):
@@ -72,3 +84,4 @@ else:
             fp_w.write('\n'+'<p>'+ words +'</p>')
         fp_w.write('\n'+'</body>'+'\n'+'</html>')
         fp_w.close()
+os.remove(i_path+'temp.txt')
